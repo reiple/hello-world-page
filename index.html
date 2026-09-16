@@ -140,6 +140,23 @@
       color: #2f6f4f;
       font-weight: 700;
     }
+    .day-card .day-note {
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: #f2f8f4;
+      border-left: 3px solid #2f6f4f;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      line-height: 1.5;
+      color: #3c4a42;
+    }
+    .day-card .day-note .note-label {
+      display: block;
+      font-weight: 700;
+      color: #2f6f4f;
+      margin-bottom: 3px;
+      font-size: 0.78rem;
+    }
   </style>
 </head>
 <body>
@@ -230,11 +247,13 @@
               </div>
             </div>
           `).join('');
+        const note = dayNotes[date];
         return `
           <div class="day-card">
             <div class="date-title">${title} <span class="weekday">${weekday}</span></div>
             ${rows}
             <div class="day-total">하루 합계 ${dayKcal.toLocaleString()} kcal</div>
+            ${note ? `<div class="day-note"><span class="note-label">💬 식단 평가</span>${note}</div>` : ''}
           </div>
         `;
       }).join('');
