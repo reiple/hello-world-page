@@ -11,9 +11,8 @@ const meals = [
     date: '2026-09-16',
     type: '점심',
     items: [
-      { name: '부추듬뿍매운쌀국수', kcal: 550 },
-      { name: '고기메밀전병', kcal: 350 },
-      { name: '단무지', kcal: 15 },
+      { name: '부추듬뿍매운쌀국수 (1/2그릇)', kcal: 275 },
+      { name: '고기메밀전병 2개', kcal: 220 },
     ],
   },
 ];
