@@ -9,6 +9,13 @@
 const meals = [
   {
     date: '2026-09-16',
+    type: '아침',
+    items: [
+      { name: '유부초밥 3개', kcal: 200 },
+    ],
+  },
+  {
+    date: '2026-09-16',
     type: '점심',
     items: [
       { name: '부추듬뿍매운쌀국수 (1/2그릇)', kcal: 275 },
