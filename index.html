@@ -3,24 +3,198 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hello World</title>
+  <title>식단 기록</title>
   <style>
+    * { box-sizing: border-box; }
     body {
       margin: 0;
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #1e1e2f;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      min-height: 100vh;
+      background: #f4f6f5;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", Arial, sans-serif;
+      color: #22292f;
     }
-    h1 {
-      color: #ffffff;
-      font-size: 3rem;
+    header {
+      background: #2f6f4f;
+      color: #fff;
+      padding: 24px 16px;
+      text-align: center;
+    }
+    header h1 {
+      margin: 0 0 4px;
+      font-size: 1.6rem;
+    }
+    header p {
+      margin: 0;
+      opacity: 0.85;
+      font-size: 0.9rem;
+    }
+    main {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 20px 16px 60px;
+    }
+    .summary {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .summary .card {
+      flex: 1;
+      background: #fff;
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .summary .card .num {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #2f6f4f;
+    }
+    .summary .card .label {
+      font-size: 0.78rem;
+      color: #667;
+      margin-top: 2px;
+    }
+    .day-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 16px 18px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .day-card .date-title {
+      font-weight: 700;
+      font-size: 1.05rem;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .day-card .date-title .weekday {
+      font-weight: 400;
+      font-size: 0.85rem;
+      color: #888;
+    }
+    .meal-row {
+      display: flex;
+      gap: 10px;
+      padding: 8px 0;
+      border-top: 1px solid #f0f0f0;
+      align-items: flex-start;
+    }
+    .meal-row:first-of-type {
+      border-top: none;
+    }
+    .meal-type {
+      flex: none;
+      min-width: 46px;
+      text-align: center;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #fff;
+      border-radius: 8px;
+      padding: 3px 6px;
+    }
+    .meal-type.아침 { background: #f2b134; }
+    .meal-type.점심 { background: #4fa9d8; }
+    .meal-type.저녁 { background: #6a5fc1; }
+    .meal-type.간식 { background: #e0658c; }
+    .meal-content .food {
+      font-size: 0.95rem;
+    }
+    .meal-content .memo {
+      font-size: 0.8rem;
+      color: #888;
+      margin-top: 2px;
+    }
+    .empty {
+      text-align: center;
+      color: #888;
+      padding: 60px 20px;
+      line-height: 1.6;
     }
   </style>
 </head>
 <body>
-  <h1>Hello, World!</h1>
+  <header>
+    <h1>🍽 식단 기록</h1>
+    <p>매일 먹은 음식을 채팅으로 알려주면 여기에 기록됩니다</p>
+  </header>
+  <main>
+    <div class="summary">
+      <div class="card">
+        <div class="num" id="dayCount">0</div>
+        <div class="label">기록된 날짜</div>
+      </div>
+      <div class="card">
+        <div class="num" id="mealCount">0</div>
+        <div class="label">전체 식사 수</div>
+      </div>
+    </div>
+    <div id="log"></div>
+  </main>
+
+  <script src="meals.js"></script>
+  <script>
+    const typeOrder = ['아침', '점심', '저녁', '간식'];
+
+    function formatDate(dateStr) {
+      const d = new Date(dateStr + 'T00:00:00');
+      const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
+      return {
+        title: `${d.getMonth() + 1}월 ${d.getDate()}일`,
+        weekday: `${weekdays[d.getDay()]}요일`
+      };
+    }
+
+    function render() {
+      const log = document.getElementById('log');
+      const dayCount = document.getElementById('dayCount');
+      const mealCount = document.getElementById('mealCount');
+
+      if (!meals.length) {
+        log.innerHTML = '<div class="empty">아직 기록된 식사가 없습니다.<br>먹은 음식을 알려주시면 여기에 표시됩니다.</div>';
+        dayCount.textContent = '0';
+        mealCount.textContent = '0';
+        return;
+      }
+
+      const byDate = {};
+      meals.forEach(m => {
+        if (!byDate[m.date]) byDate[m.date] = [];
+        byDate[m.date].push(m);
+      });
+
+      const dates = Object.keys(byDate).sort((a, b) => b.localeCompare(a));
+
+      dayCount.textContent = dates.length;
+      mealCount.textContent = meals.length;
+
+      log.innerHTML = dates.map(date => {
+        const { title, weekday } = formatDate(date);
+        const rows = byDate[date]
+          .slice()
+          .sort((a, b) => typeOrder.indexOf(a.type) - typeOrder.indexOf(b.type))
+          .map(m => `
+            <div class="meal-row">
+              <div class="meal-type ${m.type}">${m.type}</div>
+              <div class="meal-content">
+                <div class="food">${m.food}</div>
+                ${m.memo ? `<div class="memo">${m.memo}</div>` : ''}
+              </div>
+            </div>
+          `).join('');
+        return `
+          <div class="day-card">
+            <div class="date-title">${title} <span class="weekday">${weekday}</span></div>
+            ${rows}
+          </div>
+        `;
+      }).join('');
+    }
+
+    render();
+  </script>
 </body>
 </html>
