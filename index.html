@@ -114,6 +114,32 @@
       padding: 60px 20px;
       line-height: 1.6;
     }
+    .kcal-note {
+      text-align: center;
+      font-size: 0.75rem;
+      color: #999;
+      margin: -8px 0 18px;
+    }
+    .meal-content .food {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .meal-content .food .kcal {
+      flex: none;
+      color: #2f6f4f;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+    .day-card .day-total {
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px dashed #ddd;
+      text-align: right;
+      font-size: 0.85rem;
+      color: #2f6f4f;
+      font-weight: 700;
+    }
   </style>
 </head>
 <body>
@@ -131,7 +157,12 @@
         <div class="num" id="mealCount">0</div>
         <div class="label">전체 식사 수</div>
       </div>
+      <div class="card">
+        <div class="num" id="avgKcal">0</div>
+        <div class="label">일 평균 kcal</div>
+      </div>
     </div>
+    <p class="kcal-note">※ 칼로리는 일반적인 외식 1인분 기준 추정치입니다</p>
     <div id="log"></div>
   </main>
 
@@ -148,15 +179,21 @@
       };
     }
 
+    function mealKcal(m) {
+      return m.items.reduce((sum, it) => sum + (it.kcal || 0), 0);
+    }
+
     function render() {
       const log = document.getElementById('log');
       const dayCount = document.getElementById('dayCount');
       const mealCount = document.getElementById('mealCount');
+      const avgKcal = document.getElementById('avgKcal');
 
       if (!meals.length) {
         log.innerHTML = '<div class="empty">아직 기록된 식사가 없습니다.<br>먹은 음식을 알려주시면 여기에 표시됩니다.</div>';
         dayCount.textContent = '0';
         mealCount.textContent = '0';
+        avgKcal.textContent = '0';
         return;
       }
 
@@ -171,16 +208,24 @@
       dayCount.textContent = dates.length;
       mealCount.textContent = meals.length;
 
+      const totalKcal = meals.reduce((sum, m) => sum + mealKcal(m), 0);
+      avgKcal.textContent = Math.round(totalKcal / dates.length).toLocaleString();
+
       log.innerHTML = dates.map(date => {
         const { title, weekday } = formatDate(date);
-        const rows = byDate[date]
+        const dayMeals = byDate[date];
+        const dayKcal = dayMeals.reduce((sum, m) => sum + mealKcal(m), 0);
+        const rows = dayMeals
           .slice()
           .sort((a, b) => typeOrder.indexOf(a.type) - typeOrder.indexOf(b.type))
           .map(m => `
             <div class="meal-row">
               <div class="meal-type ${m.type}">${m.type}</div>
               <div class="meal-content">
-                <div class="food">${m.food}</div>
+                <div class="food">
+                  <span>${m.items.map(it => it.name).join(', ')}</span>
+                  <span class="kcal">${mealKcal(m).toLocaleString()} kcal</span>
+                </div>
                 ${m.memo ? `<div class="memo">${m.memo}</div>` : ''}
               </div>
             </div>
@@ -189,6 +234,7 @@
           <div class="day-card">
             <div class="date-title">${title} <span class="weekday">${weekday}</span></div>
             ${rows}
+            <div class="day-total">하루 합계 ${dayKcal.toLocaleString()} kcal</div>
           </div>
         `;
       }).join('');
