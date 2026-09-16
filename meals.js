@@ -28,5 +28,6 @@ const meals = [
     items: [
       { name: '디카페인 아메리카노 1잔', kcal: 5 },
     ],
+    memo: '광혁이 형이 사줌',
   },
 ];
